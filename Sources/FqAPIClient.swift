@@ -220,14 +220,14 @@ final class FqAPIClient {
         }
         let candidates = values.compactMap { item -> FqVideoTrack? in
             guard let url = string(item["main_url"]),
-                  let encrypt = item["encrypt_info"] as? [String: Any],
-                  let spade = string(encrypt["spade_a"]) else { return nil }
+                  let spade = string((item["encrypt_info"] as? [String: Any])?["spade_a"])
+                    ?? string(item["spade_a"]) else { return nil }
             let meta = item["video_meta"] as? [String: Any] ?? [:]
             return FqVideoTrack(
                 url: url,
                 spadeA: spade,
-                definition: string(meta["definition"]) ?? "?",
-                size: int(meta["size"]) ?? 0,
+                definition: string(meta["definition"]) ?? string(item["definition"]) ?? "?",
+                size: int(meta["size"]) ?? int(item["size"]) ?? 0,
                 backupURL: string(item["backup_url"]) ?? string(item["backup_url_1"])
             )
         }
