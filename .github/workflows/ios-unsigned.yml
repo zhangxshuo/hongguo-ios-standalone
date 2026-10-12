@@ -38,8 +38,19 @@ jobs:
           cp -R build/Build/Products/Release-iphoneos/HongguoIOS.app Payload/
           zip -qry HongguoIOS-unsigned.ipa Payload
 
+      - name: Package ad-hoc signed IPA
+        run: |
+          rm -rf Payload-AdHoc
+          mkdir -p Payload-AdHoc
+          cp -R build/Build/Products/Release-iphoneos/HongguoIOS.app Payload-AdHoc/
+          codesign --force --deep --sign - Payload-AdHoc/HongguoIOS.app
+          cd Payload-AdHoc
+          zip -qry ../HongguoIOS-adhoc.ipa HongguoIOS.app
+
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
-          name: HongguoIOS-unsigned
-          path: HongguoIOS-unsigned.ipa
+          name: HongguoIOS-builds
+          path: |
+            HongguoIOS-unsigned.ipa
+            HongguoIOS-adhoc.ipa
