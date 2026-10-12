@@ -169,9 +169,24 @@ final class FqAPIClient {
             "series_id": seriesId,
         ]
         let json = try await request(method: "POST", path: "/novel/player/multi_video_detail/v1/", body: body)
-        guard let data = json["data"] as? [String: Any],
-              let record = data[seriesId] as? [String: Any] else {
-            throw FqAPIError.upstream("detail 缺少 series 数据")
+        guard let rawData = json["data"] else {
+            throw FqAPIError.upstream("detail 缺少 data")
+        }
+        let record: [String: Any]
+        if let data = rawData as? [String: Any] {
+            if let direct = data[seriesId] as? [String: Any] {
+                record = direct
+            } else if let first = data.values.compactMap({ $0 as? [String: Any] }).first {
+                record = first
+            } else {
+                throw FqAPIError.upstream(
+                    "detail 缺少 series 数据 dataKeys=\(data.keys.sorted().joined(separator: ",")) seriesId=\(seriesId)"
+                )
+            }
+        } else if let list = rawData as? [[String: Any]], let first = list.first {
+            record = first
+        } else {
+            throw FqAPIError.upstream("detail data 类型异常")
         }
         let videoData: [String: Any]
         if let value = record["video_data"] as? [String: Any] {
