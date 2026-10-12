@@ -78,7 +78,12 @@ final class FqAPIClient {
             ("sub_selected_items", sub),
             ("session_uuid", session),
         ]
-        let json = try await request(method: "GET", path: "/reading/bookapi/bookmall/cell/change/v", query: query)
+        let json = try await request(
+            method: "GET",
+            path: "/reading/bookapi/bookmall/cell/change/v",
+            query: query,
+            signed: false
+        )
         guard let data = json["data"] as? [String: Any],
               let cellView = data["cell_view"] as? [String: Any],
               let cells = cellView["cell_data"] as? [[String: Any]] else {
@@ -123,7 +128,12 @@ final class FqAPIClient {
             ("count", "0"),
             ("use_correct", "true"),
         ]
-        let json = try await request(method: "GET", path: "/reading/bookapi/search/tab/v", query: extra)
+        let json = try await request(
+            method: "GET",
+            path: "/reading/bookapi/search/tab/v",
+            query: extra,
+            signed: false
+        )
         guard let tabs = json["search_tabs"] as? [[String: Any]],
               let data = tabs.first?["data"] as? [[String: Any]] else {
             return []
@@ -263,7 +273,8 @@ final class FqAPIClient {
         method: String,
         path: String,
         query: [(String, String)] = [],
-        body: [String: Any]? = nil
+        body: [String: Any]? = nil,
+        signed: Bool = true
     ) async throws -> [String: Any] {
         let allQuery = baseQuery + query + [("_rticket", String(Int64(Date().timeIntervalSince1970 * 1000)))]
         let queryText = allQuery.map { "\($0.0)=\(percentEncode($0.1))" }.joined(separator: "&")
@@ -290,13 +301,15 @@ final class FqAPIClient {
             bodyData = nil
         }
 
-        let signatures = try FqSigner.shared.sign(
-            url: url.absoluteString,
-            headers: headerMap,
-            order: headerOrder
-        )
-        for (name, value) in signatures {
-            headerMap[name.lowercased()] = value
+        if signed {
+            let signatures = try FqSigner.shared.sign(
+                url: url.absoluteString,
+                headers: headerMap,
+                order: headerOrder
+            )
+            for (name, value) in signatures {
+                headerMap[name.lowercased()] = value
+            }
         }
 
         var request = URLRequest(url: url)

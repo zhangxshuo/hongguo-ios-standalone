@@ -34,13 +34,15 @@ final class AppModel: ObservableObject {
         errorMessage = nil
         defer { isLoading = false }
         do {
-            async let rankTask = client.rank(board: "hot", limit: 20)
-            async let latestTask = client.rank(board: "new", limit: 20)
-            rankItems = try await rankTask
-            latestItems = try await latestTask
+            rankItems = try await client.rank(board: "hot", limit: 20)
             statusText = "签名器与数据接口正常"
         } catch {
             errorMessage = error.localizedDescription
+        }
+        do {
+            latestItems = try await client.rank(board: "new", limit: 20)
+        } catch {
+            latestItems = []
         }
     }
 
