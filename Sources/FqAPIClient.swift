@@ -33,10 +33,6 @@ final class FqAPIClient {
     static let shared = FqAPIClient()
 
     private let host = "api5-normal-sinfonlinea.fqnovel.com"
-    private let deviceID = "4223674528607515"
-    private let iid = "4223674528611611"
-    private let cdid = UUID().uuidString
-
     private var baseQuery: [(String, String)] {
         [
             ("aid", "8662"),
@@ -48,9 +44,6 @@ final class FqAPIClient {
             ("device_type", "audit-windows"),
             ("os_version", "12"),
             ("update_version_code", "72232"),
-            ("device_id", deviceID),
-            ("iid", iid),
-            ("cdid", cdid),
         ]
     }
 
