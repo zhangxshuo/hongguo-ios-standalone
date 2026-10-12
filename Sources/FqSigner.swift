@@ -42,6 +42,7 @@ final class FqSigner {
     private let soPath: String
     private let cppPath: String
     private let certPath: String
+    private let queue = DispatchQueue(label: "cn.guoban.hongguo.signer")
 
     private init() {
         soPath = Bundle.main.path(forResource: "libmetasec_ml", ofType: "so") ?? ""
@@ -50,6 +51,12 @@ final class FqSigner {
     }
 
     func sign(url: String, headers: [String: String], order: [String]) throws -> [String: String] {
+        try queue.sync {
+            try performSign(url: url, headers: headers, order: order)
+        }
+    }
+
+    private func performSign(url: String, headers: [String: String], order: [String]) throws -> [String: String] {
         guard !soPath.isEmpty else { throw FqSignerError.missingResource("libmetasec_ml.so") }
         guard !cppPath.isEmpty else { throw FqSignerError.missingResource("libc++_shared.so") }
         guard !certPath.isEmpty else { throw FqSignerError.missingResource("ms_16777218.bin") }
