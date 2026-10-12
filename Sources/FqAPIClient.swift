@@ -170,12 +170,26 @@ final class FqAPIClient {
         ]
         let json = try await request(method: "POST", path: "/novel/player/multi_video_detail/v1/", body: body)
         guard let data = json["data"] as? [String: Any],
-              let record = data[seriesId] as? [String: Any],
-              let videoData = record["video_data"] as? [String: Any],
-              let videos = videoData["video_list"] as? [[String: Any]] else {
-            return []
+              let record = data[seriesId] as? [String: Any] else {
+            throw FqAPIError.upstream("detail 缺少 series 数据")
         }
-        return videos.compactMap { video in
+        let videoData: [String: Any]
+        if let value = record["video_data"] as? [String: Any] {
+            videoData = value
+        } else if let list = record["video_data"] as? [[String: Any]], let first = list.first {
+            videoData = first
+        } else {
+            videoData = record
+        }
+        let rawVideos: [[String: Any]]
+        if let list = videoData["video_list"] as? [[String: Any]] {
+            rawVideos = list
+        } else if let dict = videoData["video_list"] as? [String: Any] {
+            rawVideos = dict.values.compactMap { $0 as? [String: Any] }
+        } else {
+            throw FqAPIError.upstream("detail 缺少 video_list")
+        }
+        let result = rawVideos.compactMap { video -> Episode? in
             guard let vid = string(video["vid"]) else { return nil }
             return Episode(
                 index: int(video["vid_index"]) ?? 0,
@@ -185,6 +199,10 @@ final class FqAPIClient {
                 cover: string(video["episode_cover"]) ?? string(video["cover"])
             )
         }.sorted { $0.index < $1.index }
+        if result.isEmpty {
+            throw FqAPIError.upstream("detail 返回 0 集")
+        }
+        return result
     }
 
     func videoTrack(vid: String) async throws -> FqVideoTrack {
@@ -204,10 +222,19 @@ final class FqAPIClient {
         ]
         let json = try await request(method: "POST", path: "/novel/player/multi_video_model/v1/", body: body)
         guard let data = json["data"] as? [String: Any],
-              let record = data[vid] as? [String: Any],
-              let modelText = record["video_model"] as? String,
-              let modelData = modelText.data(using: .utf8),
-              let model = try JSONSerialization.jsonObject(with: modelData) as? [String: Any] else {
+              let record = data[vid] as? [String: Any] else {
+            throw FqAPIError.invalidData
+        }
+        let model: [String: Any]
+        if let modelText = record["video_model"] as? String {
+            guard let modelData = modelText.data(using: .utf8),
+                  let parsed = try JSONSerialization.jsonObject(with: modelData) as? [String: Any] else {
+                throw FqAPIError.invalidData
+            }
+            model = parsed
+        } else if let value = record["video_model"] as? [String: Any] {
+            model = value
+        } else {
             throw FqAPIError.invalidData
         }
         let values: [[String: Any]]
