@@ -16,6 +16,7 @@ GitHub Actions 构建的未签名 IPA：
 
 ```text
 dist/HongguoIOS-unsigned.ipa
+dist/HongguoIOS-adhoc.ipa
 ```
 
 仓库：
@@ -29,6 +30,8 @@ https://github.com/zhangxshuo/hongguo-ios-standalone
 1. 用全能签导入 `HongguoIOS-unsigned.ipa`。
 2. 使用你自己的可用证书签名。
 3. 安装后直接打开。首次加载榜单和剧集会走内置签名器；播放时会先下载并离线解密整集，然后本地播放。
+
+如果全能签导入未签名包时报签名/格式错误，改用 `HongguoIOS-adhoc.ipa` 再重签。这个包在打包前已经做过一次 ad-hoc 签名，兼容性更好。
 
 ## 构建
 
