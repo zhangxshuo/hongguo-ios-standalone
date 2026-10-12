@@ -22,7 +22,7 @@ jobs:
         run: |
           xcodebuild \
             -project HongguoIOS.xcodeproj \
-            -target HongguoIOS \
+            -scheme HongguoIOS \
             -configuration Release \
             -sdk iphoneos \
             -derivedDataPath build \
