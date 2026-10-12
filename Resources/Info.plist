@@ -28,7 +28,7 @@
         <true/>
     </dict>
     <key>NSLocalNetworkUsageDescription</key>
-    <string>连接本地红果媒体后端</string>
+    <string>用于本地签名和媒体解密</string>
     <key>UILaunchScreen</key>
     <dict/>
     <key>UISupportedInterfaceOrientations</key>
