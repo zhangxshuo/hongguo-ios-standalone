@@ -2,6 +2,7 @@ name: HongguoIOS
 
 options:
   bundleIdPrefix: cn.guoban
+  xcodeVersion: "15.0"
   deploymentTarget:
     iOS: "15.0"
   createIntermediateGroups: true
