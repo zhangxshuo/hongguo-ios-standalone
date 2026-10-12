@@ -44,9 +44,9 @@ final class FqSigner {
     private let certPath: String
 
     private init() {
-        soPath = Bundle.main.path(forResource: "libmetasec_ml", ofType: "so", inDirectory: "fq_oversea") ?? ""
-        cppPath = Bundle.main.path(forResource: "libc++_shared", ofType: "so", inDirectory: "fq_oversea") ?? ""
-        certPath = Bundle.main.path(forResource: "ms_16777218", ofType: "bin", inDirectory: "fq_oversea") ?? ""
+        soPath = Bundle.main.path(forResource: "libmetasec_ml", ofType: "so") ?? ""
+        cppPath = Bundle.main.path(forResource: "libc++_shared", ofType: "so") ?? ""
+        certPath = Bundle.main.path(forResource: "ms_16777218", ofType: "bin") ?? ""
     }
 
     func sign(url: String, headers: [String: String], order: [String]) throws -> [String: String] {
